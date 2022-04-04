@@ -22,44 +22,48 @@ end
 local function parseConfig()
   printc(65, 255, 250, 100, "[Watermark] Loading watermark coordinates configuration, please wait")
 
-  local file = io.open("watermark.conf", "w+r")
-  local contents = file:read("*all")
-  local index = 0
-  for i in string.gmatch(contents, "%S+") do
-    if (index == 0) then
-      x = tonumber(i)
-      if (x == nil) then
-        x = 5
-        printc(255, 100, 100, 100, "[Watermark] Corrupted configuration data at line 1 for coordinate X, invalid number provided, default will be used (5)")
-      end
-    else
-      if (index == 1) then
-        y = tonumber(i)
-        if (y == nil) then
-          y = 5
-          printc(255, 100, 100, 100, "[Watermark] Corrupted configuration data at line 2 for coordinate Y, invalid number provided, default will be used (5)")
+  local file = io.open("watermark.conf", "r+")
+  if (not file == nil) then
+    local contents = file:read("*all")
+    local index = 0
+    for i in string.gmatch(contents, "%S+") do
+      if (index == 0) then
+        x = tonumber(i)
+        if (x == nil) then
+          x = 5
+          printc(255, 100, 100, 100, "[Watermark] Corrupted configuration data at line 1 for coordinate X, invalid number provided, default will be used (5)")
         end
       else
-        if (index == 2) then
-          enabled = i
-
-          if enabled == "true" or enabled == "1" then
-            enabled = true
-          else
-            if enabled == "false" or enabled == "0" then
-              enabled = false
-            else
-              enabled = true
-              printc(255, 100, 100, 100, "[Watermark] Corrupted configuration data at line 3 for enable status, invalid boolean provided, default will be used (true)")
-            end
+        if (index == 1) then
+          y = tonumber(i)
+          if (y == nil) then
+            y = 5
+            printc(255, 100, 100, 100, "[Watermark] Corrupted configuration data at line 2 for coordinate Y, invalid number provided, default will be used (5)")
           end
         else
-          break
+          if (index == 2) then
+            enabled = i
+
+            if enabled == "true" or enabled == "1" then
+              enabled = true
+            else
+              if enabled == "false" or enabled == "0" then
+                enabled = false
+              else
+                enabled = true
+                printc(255, 100, 100, 100, "[Watermark] Corrupted configuration data at line 3 for enable status, invalid boolean provided, default will be used (true)")
+              end
+            end
+          else
+            break
+          end
         end
       end
+
+      index = index + 1
     end
 
-    index = index + 1
+    file:close()
   end
 
   printc(65, 255, 250, 100, "[Watermark] Finished loading watermark")
@@ -107,10 +111,12 @@ local function watermark()
         y = tmpY
 
         local file = io.open("watermark.conf", "w+")
-        file:write(x .. "\n")
-        file:write(y .. "\n")
-        file:write(tostring(enabled) .. "\n")
-        file:close()
+        if (not file == nil) then  
+          file:write(x .. "\n")
+          file:write(y .. "\n")
+          file:write(tostring(enabled) .. "\n")
+          file:close()
+        end
       end
     end
 
@@ -131,10 +137,12 @@ local function onStringCmd(stringCmd)
       end
 
       local file = io.open("watermark.conf", "w+")
-      file:write(x .. "\n")
-      file:write(y .. "\n")
-      file:write(tostring(enabled) .. "\n")
-      file:close()
+      if (not file == nil) then
+        file:write(x .. "\n")
+        file:write(y .. "\n")
+        file:write(tostring(enabled) .. "\n")
+        file:close()
+      end
   end
 end
 
